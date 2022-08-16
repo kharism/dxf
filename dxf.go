@@ -33,6 +33,7 @@ func FromFile(fn string) (*drawing.Drawing, error) {
 	if err != nil {
 		return nil, err
 	}
+	// fmt.Println("KKKKKK")
 	defer f.Close()
 	return FromReader(f)
 }

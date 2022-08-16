@@ -7,9 +7,10 @@ import (
 // LwPolyline represents LWPOLYLINE Entity.
 type LwPolyline struct {
 	*entity
-	Num      int // 90
-	Closed   bool
-	Vertices [][]float64
+	Num       int // 90
+	Closed    bool
+	Elevation float64
+	Vertices  [][]float64
 }
 
 // IsEntity is for Entity interface.
@@ -20,6 +21,7 @@ func (l *LwPolyline) IsEntity() bool {
 // NewLwPolyline creates a new LwPolyline.
 func NewLwPolyline(size int) *LwPolyline {
 	vs := make([][]float64, size)
+	// fmt.Println("MakePolyline 3")
 	for i := 0; i < size; i++ {
 		vs[i] = make([]float64, 2)
 	}
@@ -29,6 +31,7 @@ func NewLwPolyline(size int) *LwPolyline {
 		Closed:   false,
 		Vertices: vs,
 	}
+	// fmt.Println()
 	return l
 }
 
@@ -42,6 +45,7 @@ func (l *LwPolyline) Format(f format.Formatter) {
 	} else {
 		f.WriteInt(70, 0)
 	}
+	f.WriteFloat(38, l.Elevation)
 	for i := 0; i < l.Num; i++ {
 		for j := 0; j < 2; j++ {
 			f.WriteFloat((j+1)*10, l.Vertices[i][j])
