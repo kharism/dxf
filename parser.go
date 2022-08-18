@@ -524,6 +524,7 @@ func ParseBlock(d *drawing.Drawing, data [][2]string) error {
 func ParseEntities(d *drawing.Drawing, line int, data [][2]string) error {
 	tmpdata := make([][2]string, 0)
 	for i, dt := range data {
+		//fmt.Println("PARSEENTITY", dt)
 		if dt[0] == "0" {
 			if len(tmpdata) > 0 {
 				e, err := ParseEntity(d, tmpdata)
@@ -534,9 +535,12 @@ func ParseEntities(d *drawing.Drawing, line int, data [][2]string) error {
 				tmpdata = make([][2]string, 0)
 			}
 		}
+		//fmt.Println(">>>>>>>")
 		tmpdata = append(tmpdata, dt)
 	}
+
 	if len(tmpdata) > 0 {
+		// fmt.Println("tmpdata", tmpdata)
 		e, err := ParseEntity(d, tmpdata)
 		if err != nil {
 			return fmt.Errorf("line %d: %s", line+2*len(data), err.Error())
@@ -575,16 +579,18 @@ func ParseEntityFunc(t string) (func(*drawing.Drawing, [][2]string) (entity.Enti
 		return ParseCircle, nil
 	case "ARC":
 		return ParseArc, nil
-	// case "POLYLINE":
-	// 	return ParsePolyline, nil
-	// case "VERTEX":
-	// 	return ParseVertex, nil
+	case "POLYLINE":
+		return ParsePolyline, nil
+	case "VERTEX":
+		return ParseVertex, nil
 	case "POINT":
 		return ParsePoint, nil
 	case "TEXT":
 		return ParseText, nil
+	case "SEQEND":
+		return ParseSeqEnd, nil
 	default:
-		return nil, errors.New("unknown entity type")
+		return nil, errors.New("unknown entity type " + t)
 	}
 }
 
@@ -620,6 +626,7 @@ func ParseLine(d *drawing.Drawing, data [][2]string) (entity.Entity, error) {
 			return l, err
 		}
 	}
+	d.Lines = append(d.Lines, l)
 	return l, nil
 }
 
@@ -685,6 +692,66 @@ func Parse3DFace(d *drawing.Drawing, data [][2]string) (entity.Entity, error) {
 		}
 	}
 	return t, nil
+}
+
+// Parse VERTEX entity
+func ParseVertex(d *drawing.Drawing, data [][2]string) (entity.Entity, error) {
+	v := &entity.Vertex{}
+	// var layer *table.Layer
+	var x, y, z float64
+	var err error
+	for _, dt := range data {
+		// fmt.Println(dt)
+		switch dt[0] {
+		default:
+			continue
+		case "8":
+			_, err := d.Layer(dt[1], false)
+			if err == nil {
+				//t.SetLayer(layer)
+				// layer = _layer
+			}
+		case "10":
+			err = setFloat(dt, func(val float64) { x = val })
+		case "20":
+			err = setFloat(dt, func(val float64) { y = val })
+		case "30":
+			err = setFloat(dt, func(val float64) { z = val })
+		}
+	}
+	// v = entity.NewVertex(x, y, z)
+	// v.SetLayer(layer)
+	g := len(d.Polylines)
+	d.Polylines[g-1].AddVertex(x, y, z)
+	return v, err
+}
+func ParseSeqEnd(d *drawing.Drawing, data [][2]string) (entity.Entity, error) {
+	// fmt.Println(d.Entities())
+	// entities := d.Entities()
+	// firstVertexIndex := 0
+	// for i := 0; i < len(entities); i++ {
+	// 	switch entities[i].(type) {
+	// 	case *entity.Vertex:
+	// 		firstVertexIndex = i
+	// 	}
+	// 	if firstVertexIndex != 0 {
+	// 		break
+	// 	}
+	// }
+	// vertexEntities := entities[firstVertexIndex:]
+	// preVertexEntities := entities
+	return nil, nil
+}
+
+// Parse POLYLINE entities
+func ParsePolyline(d *drawing.Drawing, data [][2]string) (entity.Entity, error) {
+	pl := entity.NewPolyline()
+	var err error
+	// for _, dt := range data {
+	// 	fmt.Println(dt)
+	// }
+	d.Polylines = append(d.Polylines, pl)
+	return pl, err
 }
 
 // ParseLwPolyline parses LWPOLYLINE entities.
@@ -758,6 +825,7 @@ func ParseLwPolyline(d *drawing.Drawing, data [][2]string) (entity.Entity, error
 	if ind != lw.Num {
 		return lw, fmt.Errorf("LWPOLYLINE not enough vertices")
 	}
+	d.LwPolylines = append(d.LwPolylines, lw)
 	return lw, nil
 }
 

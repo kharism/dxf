@@ -28,6 +28,9 @@ type Drawing struct {
 	CurrentLayer *table.Layer
 	CurrentStyle *table.Style
 	formatter    format.Formatter
+	LwPolylines  []*entity.LwPolyline
+	Polylines    []*entity.Polyline
+	Lines        []*entity.Line
 	Sections     []Section
 	dictionary   *object.Dictionary
 	groupdict    *object.Dictionary
@@ -48,6 +51,8 @@ func New() *Drawing {
 	d.CurrentStyle = d.Styles["STANDARD"]
 	d.formatter = format.NewASCII()
 	d.formatter.SetPrecision(16)
+	d.Polylines = []*entity.Polyline{}
+	d.LwPolylines = []*entity.LwPolyline{}
 	d.Sections = []Section{
 		header.New(),
 		class.New(),
