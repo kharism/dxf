@@ -1,4 +1,4 @@
-module github/kharism/dxf
+module github.com/kharism/dxf
 
 go 1.18
 
