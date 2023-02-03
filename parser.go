@@ -691,6 +691,7 @@ func Parse3DFace(d *drawing.Drawing, data [][2]string) (entity.Entity, error) {
 			t.Points[3][i] = t.Points[2][i]
 		}
 	}
+	d.Faces3D = append(d.Faces3D, t)
 	return t, nil
 }
 

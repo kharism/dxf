@@ -30,6 +30,7 @@ type Drawing struct {
 	formatter    format.Formatter
 	LwPolylines  []*entity.LwPolyline
 	Polylines    []*entity.Polyline
+	Faces3D      []*entity.ThreeDFace
 	Lines        []*entity.Line
 	Sections     []Section
 	dictionary   *object.Dictionary
@@ -53,6 +54,7 @@ func New() *Drawing {
 	d.formatter.SetPrecision(16)
 	d.Polylines = []*entity.Polyline{}
 	d.LwPolylines = []*entity.LwPolyline{}
+	d.Faces3D = []*entity.ThreeDFace{}
 	d.Sections = []Section{
 		header.New(),
 		class.New(),
